@@ -19,8 +19,8 @@ IGNORE_TOKEN_ID = LabelSmoother.ignore_index
 @dataclass
 class ModelArguments:
     model_name_or_path: Optional[str] = field(default="facebook/opt-125m")
-    model_type: str = field(default="deberta")
-    class_type: str = field(default="multi-regression")
+    model_type: str = field(default="llama")
+    class_type: str = field(default="generation")
     trust_remote_code: bool = field(
         default=False,
         metadata={
@@ -64,11 +64,9 @@ def rank0_print(*args):
         print(*args)
 
 
-def create_prompt(class_type, model_type, is_prometheus=False):
+def create_prompt():
     instruction = {}
-
     instruction["noref"] = "You are a helpful and precise assistant for checking the quality of the answer.\n[Question]\n{question_body}\n\n[The Start of Assistant 1's Answer]{answer1_body}\n\n[The End of Assistant 1's Answer]\n\n[The Start of Assistant 2's Answer]\n{answer2_body}\n\n[The End of Assistant 2's Answer]\n\n[System]\n{rubric}\n\n### Response:"
-
     return instruction
 
 
@@ -163,9 +161,6 @@ class GenerationLazySupervisedDataset(LazySupervisedDataset):
         return len(self.raw_data)
 
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
-        # if i in self.cached_data_dict:
-        #     return self.cached_data_dict[i]
-
         conversations, labels = preprocess(
             [self.raw_data[i]],
             self.tokenizer,
@@ -184,16 +179,6 @@ class GenerationLazySupervisedDataset(LazySupervisedDataset):
             truncation=True,
         )
         labels = copy.deepcopy(tokenized.input_ids)
-
-        # source_tokenized = self.tokenizer(
-        #     conversations,
-        #     return_tensors="pt",
-        #     padding="max_length",
-        #     max_length=self.tokenizer.model_max_length,
-        #     truncation=True,
-        # )
-        # source_len = source_tokenized.input_ids[0].ne(self.tokenizer.pad_token_id).sum().item()
-        # labels[0][:source_len] = IGNORE_TOKEN_ID
 
         ret = dict(
             input_ids=tokenized.input_ids[0],
@@ -272,15 +257,10 @@ def train():
         trust_remote_code=model_args.trust_remote_code,
     )
 
-    # model = model.to(torch.bfloat16) if training_args.bf16 else model.to(torch.float16)
     if tokenizer.pad_token != tokenizer.unk_token:
         tokenizer.pad_token = tokenizer.unk_token
-    if "prometheus" in data_args.data_path:
-        is_prometheus = True
-    else:
-        is_prometheus = False
-    instruction = create_prompt(
-        model_args.class_type, model_args.model_type, is_prometheus)
+
+    instruction = create_prompt()
 
     # Load data
     data_module = make_supervised_data_module(
