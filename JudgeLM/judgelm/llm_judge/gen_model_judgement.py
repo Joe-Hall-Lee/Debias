@@ -11,7 +11,7 @@ import torch
 from tqdm import tqdm
 
 import sys
-from pathlib import Path # if you haven't already done so
+from pathlib import Path
 file = Path(__file__).resolve()
 root = file.parents[2]
 sys.path.append(str(root))

@@ -4,7 +4,6 @@ import copy
 import pathlib
 from typing import Dict
 
-import numpy as np
 import torch
 from typing import Dict, Optional
 import transformers
@@ -19,7 +18,6 @@ IGNORE_TOKEN_ID = LabelSmoother.ignore_index
 @dataclass
 class ModelArguments:
     model_name_or_path: Optional[str] = field(default="facebook/opt-125m")
-    model_type: str = field(default="llama")
     trust_remote_code: bool = field(
         default=False,
         metadata={
@@ -69,16 +67,13 @@ def format_instruction(instruction, example):
     return prompt
 
 
-def preprocess(
-    sources,
-    tokenizer: transformers.PreTrainedTokenizer
-) -> Dict:
+def preprocess(sources) -> Dict:
 
     # Apply prompt templates
     conversations = []
     labels = []
     for i, source in enumerate(sources):
-        instruction = "You are a helpful and precise assistant for checking the quality of the answer.\n[Question]\n{question_body}\n\n[The Start of Assistant 1's Answer]{answer1_body}\n\n[The End of Assistant 1's Answer]\n\n[The Start of Assistant 2's Answer]\n{answer2_body}\n\n[The End of Assistant 2's Answer]\n\n[System]\n{rubric}\n\n### Response:"
+        instruction = "You are a helpful and precise assistant for checking the quality of the answer.\n[Question]\n{question_body}\n\n[The Start of Assistant 1's Answer]\n{answer1_body}\n\n[The End of Assistant 1's Answer]\n\n[The Start of Assistant 2's Answer]\n{answer2_body}\n\n[The End of Assistant 2's Answer]\n\n[System]\n{rubric}\n\n### Response:"
         source["rubric"] = "We would like to request your feedback on the performance of two AI assistants in response to the user question displayed above.\nPlease rate the helpfulness, relevance, accuracy, level of details of their responses. Each assistant receives an overall score on a scale of 1 to 10, where a higher score indicates better overall performance.\nPlease first output a single line containing only two values indicating the scores for Assistant 1 and 2, respectively. The two scores are separated by a space. In the subsequent line, please provide a comprehensive explanation of your evaluation, avoiding any potential bias and ensuring that the order in which the responses were presented does not affect your judgment."
 
         prompt = format_instruction(instruction, source)
@@ -104,10 +99,7 @@ class GenerationLazySupervisedDataset(LazySupervisedDataset):
         return len(self.raw_data)
 
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
-        conversations, labels = preprocess(
-            [self.raw_data[i]],
-            self.tokenizer
-        )
+        conversations, labels = preprocess([self.raw_data[i]])
         conv_labels = [conversations[0] + labels[0]]
         # Tokenize conversations
         tokenized = self.tokenizer(

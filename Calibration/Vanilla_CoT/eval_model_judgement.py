@@ -2,8 +2,6 @@ from judgelm.llm_judge.common import parse_score, translate_score_to_win_list, t
 from judgelm.utils import extract_jsonl
 import argparse
 
-from tqdm import tqdm
-
 import sys
 from pathlib import Path
 

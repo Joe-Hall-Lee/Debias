@@ -7,7 +7,6 @@
 export CUDA_VISIBLE_DEVICES=0,1,2
 WANDB_MODE=offline torchrun --nproc_per_node=3 --master_port=20002 train.py \
     --model_name_or_path ./models/vicuna-7b \
-    --model_type "llama" \
     --data_path /home/disk/huanghui/data/Superficial/judgelm_sampled_data_both.jsonl \
     --bf16 True \
     --output_dir ./output/vicuna-generation-judgelm \
