@@ -4,6 +4,14 @@ This is the official repository for paper [Mitigating the Bias of Large Language
 
 In this paper, we propose systematic research about the bias of LLM-as-a-Judge. Specifically, for closed-source judge models, we apply calibration to mitigate the significance of superficial quality, both on probability level and prompt level. For open-source judge models, we propose to mitigate the bias by contrastive training, with curated negative samples that deviate from instruction but present better superficial quality.
 
+## Online Mitigation by Calibration
+
+![](assets\superficial-quality.png)
+
+## Offline Mitigation by Contrastive Training
+
+![](assets\train.png)
+
 ## Citation
 
 ```bibtex

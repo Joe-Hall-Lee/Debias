@@ -61,7 +61,6 @@ def rank0_print(*args):
 
 def format_instruction(instruction, example):
     prompt = instruction.format(question_body=example["question_body"],
-                                rubric=example["rubric"],
                                 answer1_body=example["answer1_body"],
                                 answer2_body=example["answer2_body"])
     return prompt
@@ -73,8 +72,22 @@ def preprocess(sources) -> Dict:
     conversations = []
     labels = []
     for i, source in enumerate(sources):
-        instruction = "You are a helpful and precise assistant for checking the quality of the answer.\n[Question]\n{question_body}\n\n[The Start of Assistant 1's Answer]\n{answer1_body}\n\n[The End of Assistant 1's Answer]\n\n[The Start of Assistant 2's Answer]\n{answer2_body}\n\n[The End of Assistant 2's Answer]\n\n[System]\n{rubric}\n\n### Response:"
-        source["rubric"] = "We would like to request your feedback on the performance of two AI assistants in response to the user question displayed above.\nPlease rate the helpfulness, relevance, accuracy, level of details of their responses. Each assistant receives an overall score on a scale of 1 to 10, where a higher score indicates better overall performance.\nPlease first output a single line containing only two values indicating the scores for Assistant 1 and 2, respectively. The two scores are separated by a space. In the subsequent line, please provide a comprehensive explanation of your evaluation, avoiding any potential bias and ensuring that the order in which the responses were presented does not affect your judgment."
+        instruction = """You are a helpful and precise assistant for checking the quality of the answer.
+[Question]
+{question_body}
+
+[The Start of Assistant 1's Answer]
+{answer1_body}\n\n[The End of Assistant 1's Answer]
+
+[The Start of Assistant 2's Answer]
+{answer2_body}\n\n[The End of Assistant 2's Answer]
+
+[System]
+We would like to request your feedback on the performance of two AI assistants in response to the user question displayed above.
+Please rate the helpfulness, relevance, accuracy, level of details of their responses. Each assistant receives an overall score on a scale of 1 to 10, where a higher score indicates better overall performance.
+Please first output a single line containing only two values indicating the scores for Assistant 1 and 2, respectively. The two scores are separated by a space. In the subsequent line, please provide a comprehensive explanation of your evaluation, avoiding any potential bias and ensuring that the order in which the responses were presented does not affect your judgment.
+
+### Response:"""
 
         prompt = format_instruction(instruction, source)
         conversations.append(prompt)

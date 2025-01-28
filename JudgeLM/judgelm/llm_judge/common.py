@@ -15,13 +15,8 @@ def parse_score(review):
         if len(sp) == 2:
             return [float(sp[0]), float(sp[1])]
         else:
-            # print("review: ", review)
-            # raise Exception('Invalid score pair.')
             raise Exception()
-            pass
     except Exception as e:
-        # print(f'{e}\nContent: {review}\n'
-        #              'You must manually fix the score pair.')
         return [-1, -1]
 
 
