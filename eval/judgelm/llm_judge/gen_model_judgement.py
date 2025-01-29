@@ -17,7 +17,7 @@ root = file.parents[2]
 sys.path.append(str(root))
 print(sys.path)
 
-from judgelm.llm_judge.common import load_questions, reorg_answer_file, conv_judge_pair, conv_judge_pair_w_reference, KeywordsStoppingCriteria, parse_score, translate_score_to_win_list
+from judgelm.llm_judge.common import load_questions, reorg_answer_file, conv_judge_pair, KeywordsStoppingCriteria, parse_score, translate_score_to_win_list
 from judgelm.model import load_model
 from judgelm.utils import extract_jsonl
 
@@ -105,7 +105,7 @@ def get_model_answers(
 
     for q_i, question in tqdm(enumerate(questions)):
         torch.manual_seed(q_i)
-        conv = conv_judge_pair.copy() if references is None else conv_judge_pair_w_reference.copy()
+        conv = conv_judge_pair.copy()
         template = conv.prompt_template
 
         # if fast eval, use the "\n" as the separator

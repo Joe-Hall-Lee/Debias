@@ -4,7 +4,7 @@
 #SBATCH -o train.log # 把输出结果 STDOUT 保存在哪一个文件
 #SBATCH -w wxhd11
 # nohup bash train.sh > train.log 2>&1 &
-export CUDA_VISIBLE_DEVICES=0,1,3,4
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 WANDB_MODE=offline torchrun --nproc_per_node=4 --master_port=20002 train.py \
     --model_name_or_path ./models/Vicuna-7B \
     --data_path data/Neighbor/judgelm_sampled_data_neighbor.jsonl \

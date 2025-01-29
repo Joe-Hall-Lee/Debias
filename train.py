@@ -77,10 +77,14 @@ def preprocess(sources) -> Dict:
 {question_body}
 
 [The Start of Assistant 1's Answer]
-{answer1_body}\n\n[The End of Assistant 1's Answer]
+{answer1_body}
+
+[The End of Assistant 1's Answer]
 
 [The Start of Assistant 2's Answer]
-{answer2_body}\n\n[The End of Assistant 2's Answer]
+{answer2_body}
+
+[The End of Assistant 2's Answer]
 
 [System]
 We would like to request your feedback on the performance of two AI assistants in response to the user question displayed above.
@@ -91,7 +95,7 @@ Please first output a single line containing only two values indicating the scor
 
         prompt = format_instruction(instruction, source)
         conversations.append(prompt)
-        labels.append(source['text'])
+        labels.append(source['text'] + "</s>")
 
     return conversations, labels
 

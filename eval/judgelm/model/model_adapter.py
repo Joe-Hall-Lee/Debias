@@ -25,7 +25,6 @@ from transformers import (
     T5Tokenizer,
 )
 
-from judgelm.modules.gptq import GptqConfig, load_gptq_quantized
 from judgelm.conversation import Conversation, get_conv_template
 from judgelm.model.compression import load_compress_model
 from judgelm.model.model_chatglm import generate_stream_chatglm
@@ -149,7 +148,7 @@ def load_model(
     max_gpu_memory: Optional[str] = None,
     load_8bit: bool = False,
     cpu_offloading: bool = False,
-    gptq_config: Optional[GptqConfig] = None,
+    gptq_config = None,
     revision: str = "main",
     debug: bool = False,
 ):
@@ -183,21 +182,6 @@ def load_model(
                 print("kwargs['max_memory'] = ", kwargs["max_memory"])
             else:
                 kwargs["max_memory"] = {i: max_gpu_memory for i in range(num_gpus)}
-    elif device == "mps":
-        kwargs = {"torch_dtype": torch.float16}
-        # Avoid bugs in mps backend by not using in-place operations.
-        replace_llama_attn_with_non_inplace_operations()
-    elif device == "xpu":
-        kwargs = {"torch_dtype": torch.bfloat16}
-        # Try to load ipex, while it looks unused, it links into torch for xpu support
-        try:
-            import intel_extension_for_pytorch as ipex
-        except ImportError:
-            warnings.warn(
-                "Intel Extension for PyTorch is not installed, but is required for xpu inference."
-            )
-    else:
-        raise ValueError(f"Invalid device: {device}")
 
     if cpu_offloading:
         # raises an error on incompatible platforms
@@ -223,20 +207,6 @@ def load_model(
                 torch_dtype=kwargs["torch_dtype"],
                 revision=revision,
             )
-    elif gptq_config and gptq_config.wbits < 16:
-        model, tokenizer = load_gptq_quantized(model_path, gptq_config)
-        if num_gpus != 1:
-            device_map = accelerate.infer_auto_device_map(
-                model,
-                max_memory=kwargs["max_memory"],
-                no_split_module_classes=["LlamaDecoderLayer"],
-            )
-            model = accelerate.dispatch_model(
-                model, device_map=device_map, offload_buffers=True
-            )
-        else:
-            model.to(device)
-        return model, tokenizer
     kwargs["revision"] = revision
 
     # Load model
