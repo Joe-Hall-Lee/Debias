@@ -6,11 +6,30 @@ In this paper, we propose systematic research about the bias of LLM-as-a-Judge. 
 
 ## Online Mitigation by Calibration
 
-![](assets\superficial-quality.png)
+![Online Mitigation by Calibration](https://github.com/Joe-Hall-Lee/Debias/blob/main/assets/superficial-quality.png)
 
 ## Offline Mitigation by Contrastive Training
 
-![](assets\train.png)
+![Offline Mitigation by Contrastive Training](https://github.com/Joe-Hall-Lee/Debias/blob/main/assets/train.png)
+
+## ⚡️ Usage
+
+### Preparation
+
+Please refer to the following commands to prepare your environment.
+
+```shell
+conda create -n debias python=3.10
+pip install -r requirements.txt
+```
+
+### Fine-tune your own judge model
+
+You can train your own judge based on open-source judge data and a foundation model.
+
+```shell
+bash train.sh
+```
 
 ## Citation
 
@@ -18,8 +37,12 @@ In this paper, we propose systematic research about the bias of LLM-as-a-Judge. 
 @inproceedings{zhou2024mitigating,
     title={Mitigating the Bias of Large Language Model Evaluation},
     author={Zhou, Hongli and Huang, Hui and Long, Yunfei and Xu, Bing and Zhu, Conghui and Cao, Hailong and Yang, Muyun and Zhao, Tiejun},
-    booktitle={The 23rd China National Conference on Computational Linguistics},
-    year={2024}
+    booktitle={Proceedings of the 23rd Chinese National Conference on Computational Linguistics (Volume 1: Main Conference)},
+    year={2024},
+    address={Taiyuan, China},
+    publisher={Chinese Information Processing Society of China},
+    url={https://aclanthology.org/2024.ccl-1.101/},
+    pages={1310--1319}
 }
 ```
 
