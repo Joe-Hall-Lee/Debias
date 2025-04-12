@@ -18,9 +18,9 @@ with open("data/Neighbor/instruction/better.json", 'r') as fin:
             instance.pop("text")
 
 # Load sft.json and embeddings
-with open("data/judgelm/sft.json", 'r') as fin:
+with open("data/Neighbor/sft.json", 'r') as fin:
     SFT = json.load(fin)
-neighbor = torch.load("data/Neighbor/instruction/neighbor500_better.bin")
+neighbor = torch.load("data/Neighbor/instruction/neighbor500_better.bin", weights_only=False)
 
 # Open the new jsonl file for writing converted data
 os.makedirs("data/judgelm/threshold", exist_ok=True)

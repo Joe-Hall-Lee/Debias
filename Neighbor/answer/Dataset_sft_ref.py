@@ -3,6 +3,8 @@ import torch
 import random
 import uuid
 import os
+import torch.serialization
+import numpy._core.multiarray as multiarray
 
 def create_unique_id():
     return uuid.uuid4().hex
@@ -10,42 +12,49 @@ def create_unique_id():
 threshold = 0.1
 question_id_counter = 200000  # Starting value for question_id
 
-# Load the dataset
+# 将 NumPy 的 _reconstruct 添加到白名单以避免 torch.load 报错
+torch.serialization.add_safe_globals([multiarray._reconstruct])
+
+# 加载 judgelm.json 数据集
 with open("data/judgelm/judgelm.json", 'r') as fin:
     dataset = json.load(fin)
 
-# Load neighbors
+# 加载 sft.json 获取好答案分数
+with open("data/Neighbor/sft.json", 'r') as fin:
+    SFT = json.load(fin)
+
+# 加载邻居数据
 neighbor = torch.load("data/Neighbor/answer/embeddings/neighbor500_all.bin", weights_only=False)
 distances, indices = neighbor
 
-# Create a list to store all answers in the same order as embeddings
+# 创建答案列表，与嵌入顺序一致（好答案后接坏答案）
 all_answers = []
 for instance in dataset:
     all_answers.append({"output": instance["better"], "input": instance["input"]})
 for instance in dataset:
     all_answers.append({"output": instance["worse"], "input": instance["input"]})
 
-# Open the new jsonl file for writing
+# 创建输出目录并写入 jsonl 文件
 os.makedirs("data/Neighbor/answer/threshold", exist_ok=True)
 with open("data/Neighbor/answer/threshold/formatted.jsonl", 'w') as fout:
-    for idx in range(len(dataset)):  # Only process better answers
+    for idx, sft in zip(range(len(dataset)), SFT):  # 遍历好答案和 sft.json
         instance = dataset[idx]
         dist = distances[idx]
         neighbor_idx = indices[idx]
         
         chosen_instance = None
         for d, n_idx in zip(dist, neighbor_idx):
-            if d > threshold and n_idx >= len(dataset):  # Select a worse answer
+            if d > threshold:  # 选择坏答案
                 chosen_instance = all_answers[n_idx]
                 break
         
         if chosen_instance is not None:
             answer1_body = instance["better"]
             answer2_body = chosen_instance["output"]
-            answer1_score = 1.0  # Better answer score
-            answer2_score = 0.0  # Worse answer score
+            answer1_score = sft["score"]  # 从 sft.json 读取好答案分数
+            answer2_score = 1.0  # 坏答案固定分数
 
-            # Randomly swap answers
+            # 随机交换答案和分数
             if random.random() < 0.5:
                 answer1_body, answer2_body = answer2_body, answer1_body
                 answer1_score, answer2_score = answer2_score, answer1_score
@@ -67,4 +76,4 @@ with open("data/Neighbor/answer/threshold/formatted.jsonl", 'w') as fout:
             fout.write(json.dumps(formatted_instance) + '\n')
             question_id_counter += 1
 
-print('Conversion to JSON Lines complete.')
+print('转换到 JSON Lines 完成。')
