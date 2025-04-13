@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# bash eval/scripts/judge_on_judgelm_benchmark.sh
-
 python3 eval/judgelm/llm_judge/gen_model_judgement.py \
---model-path "/H1/zhouhongli/LLMEvalWeb/models/vicuna-generation-judgelm" \
---model-id 7b-full-model \
+--model-path "output/JudgeLM-7B-Debiased" \
+--model-id JudgeLM-7B-Debiased \
 --question-file data/LLMBar/Adversarial/Manual/converted_dataset.jsonl \
---answer-file judgements_output/Superficial/both/Adversarial/Manual/7b-full-model-reverse \
+--answer-file judgements_output/Adversarial/Manual/JudgeLM-7B-Debiased-reverse \
 --num-gpus-per-model 1 \
 --num-gpus-total 1 \
 --temperature 0.2 \
